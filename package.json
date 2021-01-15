@@ -8,17 +8,14 @@
     "start:web": "serve client"
   },
   "devDependencies": {
-    "nodemon": "^1.18.3",
-    "serve": "^9.4.0"
+    "nodemon": "^1.18.3"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
     "dotenv": "^8.2.0",
     "mongodb": "^3.6.3",
-    "redis": "^2.8.0",
     "socket.io": "^2.1.1",
-    "socket.io-redis": "^5.2.0",
-    "socketio-auth": "^0.1.1"
+    "serve": "^9.4.0"
   },
   "engines": {
     "node": "14.5.0"
