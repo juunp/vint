@@ -13,10 +13,12 @@ const database = 'voting_machine';
 const contribution_coll = 'contribution';
 const name_coll = 'name';
 
-const server = http.createServer();
-const app = express();
 
-app.use(express.static(path.resolve(__dirname, '../client')));
+const app = express();
+const server = http.createServer(app);
+
+const pathStaticFiles = path.resolve(__dirname, '.../client');
+app.use(express.static(pathStaticFiles));
 
 io.attach(server);
   
