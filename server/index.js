@@ -18,6 +18,7 @@ const app = express();
 const server = http.createServer(app);
 
 const pathStaticFiles = path.resolve(__dirname, '.../client');
+console.log(pathStaticFiles);
 app.use(express.static(pathStaticFiles));
 
 io.attach(server);
