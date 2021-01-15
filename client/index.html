@@ -8,25 +8,24 @@
   <script src="index.js"></script>
 </head>
 <body>
-  <h1>Single User Websocket Demo</h1>
+  <h1>Voting-machine</h1>
   <p>
-    <label for="status">Status: </label>
-    <input type="text" id="status"
-      name="status" value="Disconnected"
-      readonly="readonly" style="width: 300px;"
+    <label for="name">Nom: </label>
+    <input type="text" id="name"
+      name="name" value="" style="width: 300px;"
     />
+    <button type="submit" onclick="addName()">Ajouter nom</button>
   </p>
+  <ul id="list-names"> 
+  </ul>
   <p>
-    <label for="token">My Token: </label>
-    <input type="text" id="token" name="token" value="secret token" />
+    <label for="contribution">My contribution: </label>
+    <input type="text" id="contribution" name="contribution"/>
+    <button type="submit" onclick="addContrib()">Ajouter une contribution</button>
   </p>
-  <p>
-    <button id="connect" onclick="connect()">
-      Connect
-    </button>
-    <button id="disconnect" onclick="disconnect()" disabled>
-      Disconnect
-    </button>
-  </p>
+
+  <ul id="contributions">
+
+  </ul>
 </body>
 </html>
