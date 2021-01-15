@@ -1,4 +1,6 @@
-const socketUrl = 'http://localhost:9000';
+require('dotenv').config();
+const PORT = process.env.PORT || 9000;
+const socketUrl = `http://localhost:${PORT}`;
 
 let socket;
 let nameInput;
