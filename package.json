@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "node server/index.js && serve client",
     "start:server": "node server/index.js",
     "start:web": "serve client"
   },
@@ -20,6 +21,6 @@
     "socketio-auth": "^0.1.1"
   },
   "engines": {
-    "node": "10.x"
+    "node": "14.5.0"
   }
 }
