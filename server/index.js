@@ -1,6 +1,8 @@
 require('dotenv').config();
 const http = require('http');
 const io = require('socket.io')();
+const express = require('express');
+const path = require('path');
 const MongoClient = require('mongodb').MongoClient;
 
 const PORT = process.env.PORT || 9000;
@@ -12,6 +14,9 @@ const contribution_coll = 'contribution';
 const name_coll = 'name';
 
 const server = http.createServer();
+const app = express();
+
+app.use(express.static(path.resolve(__dirname, '../client')));
 
 io.attach(server);
   

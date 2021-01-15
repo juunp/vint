@@ -3,19 +3,20 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node server/index.js && serve client",
+    "start": "node server/index.js",
     "start:server": "node server/index.js",
     "start:web": "serve client"
   },
   "devDependencies": {
-    "nodemon": "^1.18.3"
+    "nodemon": "^1.18.3",
+    "serve": "^9.4.0"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
     "dotenv": "^8.2.0",
+    "express": "^4.17.1",
     "mongodb": "^3.6.3",
-    "socket.io": "^2.1.1",
-    "serve": "^9.4.0"
+    "socket.io": "^2.1.1"
   },
   "engines": {
     "node": "14.5.0"
