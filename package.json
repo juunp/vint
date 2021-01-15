@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start:server": "nodemon server/index.js",
+    "start:server": "node server/index.js",
     "start:web": "serve client"
   },
   "devDependencies": {
@@ -18,5 +18,8 @@
     "socket.io": "^2.1.1",
     "socket.io-redis": "^5.2.0",
     "socketio-auth": "^0.1.1"
+  },
+  "engines": {
+    "node": "10.x"
   }
 }
