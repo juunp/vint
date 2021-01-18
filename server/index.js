@@ -58,11 +58,11 @@ io.on('connection', (socket) => {
 
   setInterval(async () => {
     emitNames(socket);
-  }, 3000)
+  }, 1000)
 
   setInterval(async () => {
     emitContributions(socket);
-  }, 3000)
+  }, 1000)
 
 });
 
