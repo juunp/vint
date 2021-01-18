@@ -141,11 +141,12 @@ const recreateListOfContributions = (names, contributions, socketId) => {
         }
       }
     }
-    html += `<li>
-      ${contributions[val].value}
+    let liste = `<li>
+      ${contributions[val].value}<br/>
       ${votehtml}
       </li>`;
-    listContributions.innerHTML += html;
+    html += liste;
+    listContributions.innerHTML = html;
   }
 }
 
