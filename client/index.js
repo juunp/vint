@@ -105,6 +105,7 @@ const getListOfContributions = (msg) => {
 
 const recreateListOfContributions = (names, contributions, socketId) => {
   const listContributions = document.getElementById('contributions');
+  let html = '';
   while (listContributions.firstChild) {
     listContributions.firstChild.remove();
   }
@@ -130,7 +131,7 @@ const recreateListOfContributions = (names, contributions, socketId) => {
         votehtml += `${name}: ${contributions[val].votes[name] || 0} <button type="submit" onclick="addVote('${contributions[val].value}', '${name}')">+</button>`;
       }
     }
-    let html = `<li>
+    html += `<li>
       ${contributions[val].value}
       ${votehtml}
       </li>`
