@@ -112,6 +112,7 @@ const getListOfContributions = (msg) => {
 
 const recreateListOfContributions = (names, contributions, socketId) => {
   const listContributions = document.getElementById('contributions');
+  let html = '';
   while (listContributions.firstChild) {
     listContributions.firstChild.remove();
   }
@@ -141,11 +142,12 @@ const recreateListOfContributions = (names, contributions, socketId) => {
         }
       }
     }
-    let html = `<li>
+    let liste = `<li>
       ${contributions[val].value}<br/>
       ${votehtml}
       </li>`;
-    listContributions.innerHTML += html;
+    html += liste;
+    listContributions.innerHTML = html;
   }
 }
 
