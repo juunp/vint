@@ -141,13 +141,8 @@ const recreateListOfContributions = (names, contributions, socketId) => {
         }
       }
     }
-<<<<<<< HEAD
     html += `<li>
       ${contributions[val].value}
-=======
-    let html = `<li>
-      ${contributions[val].value}<br/>
->>>>>>> master
       ${votehtml}
       </li>`;
     listContributions.innerHTML += html;
