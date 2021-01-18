@@ -1,6 +1,5 @@
-require('dotenv').config();
-const PORT = process.env.PORT || 9000;
-const socketUrl = `http://localhost:${PORT}`;
+
+const socketUrl = `http://localhost:9000`;
 
 let socket;
 let nameInput;
@@ -60,20 +59,26 @@ const disconnect = () => {
 
 const addName = () => {
   const nameInput = document.getElementById('name');
-  socket.emit('name-add', nameInput.value);
+  if (nameInput.value.trim().length > 0 ){
+    socket.emit('name-add', nameInput.value);
+  }
+  nameInput.value = null;
 };
 
 const addContrib = () => {
   const contribInput = document.getElementById('contribution');
-  socket.emit('contrib-add', contribInput.value);
+  if (contribInput.value.trim().length > 0 ){
+    socket.emit('contrib-add', contribInput.value);
+  }
+  contribInput.value = null;
 };
 
-const addVote = (contrib, name) => {
-    socket.emit('vote-add', {contrib: contrib, name: name});
+const addVote = (contrib, socketId, name) => {
+    socket.emit('vote-add', {contrib: contrib, name: name, socketId: socketId});
 }
 
-const removeVote = (contrib, name) => {
-  socket.emit('vote-remove', {contrib: contrib, name: name});
+const removeVote = (contrib, socketId, name) => {
+  socket.emit('vote-remove', {contrib: contrib, name: name, socketId: socketId});
 }
 
 const getListOfNames = (msg) => {
@@ -124,19 +129,23 @@ const recreateListOfContributions = (names, contributions, socketId) => {
       }
       if (hasVoted) {
         if (hasVotedFor) {
-          votehtml += `${name}: ${contributions[val].votes[name] || 0} <button type="submit" onclick="removeVote('${contributions[val].value}', '${name}')">-</button>`
+          votehtml += `<p>${name}: ${contributions[val].votes[name] || 0} <button type="submit" aria-label="Supprimer mon vote pour ${name}" onclick="removeVote('${contributions[val].value}', '${contributions[val]['socket-id']}', '${name}')" onkeydown="removeVote('${contributions[val].value}', '${contributions[val]['socket-id']}', '${name}')">-</button></p><br/>`;
         } else {
-          votehtml += `${name}: ${contributions[val].votes[name] || 0}`;
+          votehtml += `<p>${name}: ${contributions[val].votes[name] || 0}<p><br/>`;
         }
       } else {
-        votehtml += `${name}: ${contributions[val].votes[name] || 0} <button type="submit" onclick="addVote('${contributions[val].value}', '${name}')">+</button>`;
+        if (contributions[val]['socket-id'] === socketId) {
+          votehtml += `<p>${name}: ${contributions[val].votes[name] || 0}<p><br/>`;
+        } else {
+          votehtml += `<p>${name}: ${contributions[val].votes[name] || 0} <button type="submit" aria-label="Voter pour ${name}" onclick="addVote('${contributions[val].value}', '${contributions[val]['socket-id']}', '${name}')" onkeydown="addVote('${contributions[val].value}', '${contributions[val]['socket-id']}', '${name}')">+</button></p><br/>`;
+        }
       }
     }
     let html = `<li>
-      ${contributions[val].value}
+      ${contributions[val].value}<br/>
       ${votehtml}
-      </li>`
-    listContributions.innerHTML = html;
+      </li>`;
+    listContributions.innerHTML += html;
   }
 }
 

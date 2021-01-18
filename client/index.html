@@ -6,26 +6,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
   <script src="index.js"></script>
-</head>
+  <link rel="stylesheet" media="screen" href="style.css"/>
 <body>
-  <h1>Voting-machine</h1>
-  <p>
-    <label for="name">Nom: </label>
-    <input type="text" id="name"
-      name="name" value="" style="width: 300px;"
-    />
-    <button type="submit" onclick="addName()">Ajouter nom</button>
-  </p>
-  <ul id="list-names"> 
-  </ul>
-  <p>
-    <label for="contribution">My contribution: </label>
-    <input type="text" id="contribution" name="contribution"/>
-    <button type="submit" onclick="addContrib()">Ajouter une contribution</button>
-  </p>
+  <header>
+    <h1>Voting machine</h1>
+  </header>
+  <content>
+    <div id="names-block">
 
-  <ul id="contributions">
+      <p>
+        <label for="name">Nom: </label>
+        <input type="text" id="name"
+          name="name" value=""
+        />
+        <button type="submit" onclick="addName()" onkeydown="addName()">Ajouter</button>
+      </p>
+      <ul id="list-names"> 
+      </ul>
+    </div>
+    <div id="contributions-block">
 
-  </ul>
+      <p>
+        <label for="contribution">Contribution: </label>
+        <input type="text" id="contribution" name="contribution"/>
+        <button type="submit" onclick="addContrib()" onkeydown="addContrib()">Ajouter</button>
+      </p>
+    
+      <ul id="contributions">
+    
+      </ul>
+    </div>
+  </content>
 </body>
 </html>

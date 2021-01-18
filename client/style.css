@@ -1,0 +1,95 @@
+html {
+    background-color: #333;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+header {
+    display: block;
+    background-color: black;
+    border: 2px solid #333;
+    padding: 15px;
+    text-align: center;
+    position: relative;
+}
+
+header h1{
+    position: relative;
+    display: inline-block;
+    background-color: black;
+    z-index: 10;
+}
+
+header h1::after, header h1::before {
+    content: ' ';
+    height: 3px;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+header h1::after {
+    top: -5px;
+    background: linear-gradient(to right, #83e22b 0%,#83e22b 44%, blueviolet 44%, blueviolet 100%);
+}
+
+header h1::before {
+    bottom: -9px;
+    background: linear-gradient(to right, blueviolet 0%,blueviolet 44%, #83e22b 44%, #83e22b 100%);
+}
+
+content {
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+
+#names-block, #contributions-block {
+    justify-self: center;
+}
+
+#contributions-block ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+
+#contributions-block li {
+    margin: 15px;
+    padding: 15px;
+}
+
+#contributions-block ul p {
+    margin: 0;
+}
+
+ul {
+    list-style: none;
+}
+
+#names-block ul li:before {
+    content: "\2665\00A0\00A0";
+    color: blueviolet;
+}
+
+#contributions-block ul li:before {
+    content: "\2605\00A0\00A0";
+    color: #83e22b;
+}
+
+button {
+    border: none;
+    color: white;
+    padding: 5px;
+}
+
+#names-block button {
+    background-color: blueviolet;
+    border: 1px solid white;
+}
+
+#contributions-block button {
+    background-color: #83e22b;
+    border: 1px solid white;
+    color: black;
+}
