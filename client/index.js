@@ -1,6 +1,4 @@
-require('dotenv').config();
-const PORT = process.env.PORT || 9000;
-const socketUrl = `http://localhost:${PORT}`;
+const socketUrl = `https://ws-voting-machine.herokuapp.com/`;
 
 let socket;
 let nameInput;
