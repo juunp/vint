@@ -1,6 +1,10 @@
 
 const socketUrl = `http://localhost:9000`;
 
+const urlRegex = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
+const youtubeRegex = /youtu\.?be(\.com)?\/(embed\/|watch\?v\=)?([0-9a-zA-Z]*)/;
+
+
 let socket;
 let nameInput;
 let listnames;
@@ -118,6 +122,7 @@ const recreateListOfContributions = (names, contributions, socketId) => {
   }
   for (const val in contributions) {
     let votehtml = '';
+    let contributionValue = contributions[val].value;
     let hasVoted = false;
     if (contributions[val].hasVoted.includes(socketId)) {
       hasVoted = true;
@@ -130,7 +135,7 @@ const recreateListOfContributions = (names, contributions, socketId) => {
       }
       if (hasVoted) {
         if (hasVotedFor) {
-          votehtml += `<p>${name}: ${contributions[val].votes[name] || 0} <button type="submit" aria-label="Supprimer mon vote pour ${name}" onclick="removeVote('${contributions[val].value}', '${contributions[val]['socket-id']}', '${name}')" onkeydown="removeVote('${contributions[val].value}', '${contributions[val]['socket-id']}', '${name}')">-</button></p><br/>`;
+          votehtml += `<p>${name}: ${contributions[val].votes[name] || 0} <button type="submit" aria-label="Supprimer mon vote pour ${name}" onclick="removeVote('${contributionValue}', '${contributions[val]['socket-id']}', '${name}')" onkeydown="removeVote('${contributionValue}', '${contributions[val]['socket-id']}', '${name}')">-</button></p><br/>`;
         } else {
           votehtml += `<p>${name}: ${contributions[val].votes[name] || 0}<p><br/>`;
         }
@@ -138,12 +143,26 @@ const recreateListOfContributions = (names, contributions, socketId) => {
         if (contributions[val]['socket-id'] === socketId) {
           votehtml += `<p>${name}: ${contributions[val].votes[name] || 0}<p><br/>`;
         } else {
-          votehtml += `<p>${name}: ${contributions[val].votes[name] || 0} <button type="submit" aria-label="Voter pour ${name}" onclick="addVote('${contributions[val].value}', '${contributions[val]['socket-id']}', '${name}')" onkeydown="addVote('${contributions[val].value}', '${contributions[val]['socket-id']}', '${name}')">+</button></p><br/>`;
+          votehtml += `<p>${name}: ${contributions[val].votes[name] || 0} <button type="submit" aria-label="Voter pour ${name}" onclick="addVote('${contributionValue}', '${contributions[val]['socket-id']}', '${name}')" onkeydown="addVote('${contributionValue}', '${contributions[val]['socket-id']}', '${name}')">+</button></p><br/>`;
         }
       }
     }
+    let isUrl= urlRegex.test(contributionValue);
+    let formattedContribution = contributionValue;
+    if (isUrl) {
+      formattedContribution = `<a href="${contributionValue}" rel="noopener noreferrer">${contributionValue}</a>`;
+      let isYoutube = youtubeRegex.exec(contributionValue);
+      console.log(contributionValue);
+      console.log(isYoutube);
+      if (isYoutube !== null){
+        contributionValue = `https://youtube.com/embed/${isYoutube[3]}`;
+        formattedContribution = `<iframe frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="356" height="200" type="text/html"
+         src="${contributionValue}?autoplay=0&fs=0&iv_load_policy=3&showinfo=0&rel=0&cc_load_policy=0&start=0&end=0">
+        </iframe>`;
+      }
+    }
     let liste = `<li>
-      ${contributions[val].value}<br/>
+      ${formattedContribution}<br/>
       ${votehtml}
       </li>`;
     html += liste;
