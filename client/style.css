@@ -93,3 +93,16 @@ button {
     border: 1px solid white;
     color: black;
 }
+
+#contributions-block a {
+    color: #83e22b;
+    text-decoration: none;
+}
+
+#contributions-block a:hover {
+    color: palegreen;
+}
+
+#contributions-block a:visited {
+    color: blueviolet;
+}
