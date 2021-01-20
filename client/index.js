@@ -156,15 +156,13 @@ const recreateListOfContributions = (names, contributions, socketId) => {
     let isUrl= urlRegex.test(contributionValue);
     let formattedContribution = contributionValue;
     if (isUrl) {
-      formattedContribution = `<a href="${contributionValue}" rel="noopener noreferrer">${contributionValue}</a>`;
+      formattedContribution = `<a href="${contributionValue}" rel="noopener noreferrer" target="_blank">${contributionValue}</a>`;
       let isYoutube = youtubeRegex.exec(contributionValue);
-      console.log(contributionValue);
-      console.log(isYoutube);
       if (isYoutube !== null){
-        contributionValue = `https://youtube.com/embed/${isYoutube[3]}`;
+        let youtubeVideoEmbedded = `https://youtube.com/embed/${isYoutube[3]}`;
         formattedContribution = `<iframe frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="356" height="200" type="text/html"
-         src="${contributionValue}?autoplay=0&fs=0&iv_load_policy=3&showinfo=0&rel=0&cc_load_policy=0&start=0&end=0">
-        </iframe>`;
+         src="${youtubeVideoEmbedded}?autoplay=0&fs=0&iv_load_policy=3&showinfo=0&rel=0&cc_load_policy=0&start=0&end=0">
+        </iframe><br/><a href="${contributionValue}" rel="noopener noreferrer" target="_blank">${contributionValue}</a>`;
       }
     }
     let liste = `<li>
