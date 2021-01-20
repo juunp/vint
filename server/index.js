@@ -22,8 +22,6 @@ app.use(express.static(pathStaticFiles));
 
 io.attach(server);
   
-const names = {};
-const contributions = {};
 
 io.on('connection', (socket) => {
   console.log(`Socket ${socket.id} connected.`);
@@ -33,16 +31,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('name-add', async (msg) => {
-    await createOrUpdateName(socket.id, msg);
+    await createOrUpdateName(msg.id, msg.value);
     emit(socket);
   });
 
   socket.on('contrib-add', (msg) => {
-    createOrUpdateContribution(socket.id, msg);
-    if (contributions[socket.id]) {
-      delete contributions[socket.id];
-    }
-    contributions[socket.id] = {value : msg, votes: {}};
+    createOrUpdateContribution(msg.id, msg.value);
     emit(socket);
   });
 
