@@ -5,12 +5,14 @@ const youtubeRegex = /youtu\.?be(\.com)?\/(embed\/|watch\?v\=)?([0-9a-zA-Z]*)/;
 
 
 let socket;
+const ID_NAME = 'voting-machine-id'
 let nameInput;
 let listnames;
 let serverNames = {};
 let serverContributions = {};
 let names = [];
 let contributions = [];
+let id = localStorage.getItem(ID_NAME);
 
 const connect = () => {
   let error = null;
@@ -21,6 +23,11 @@ const connect = () => {
 
   socket.on('connect', () => {
     console.log('Connected');
+    console.log(id);
+    if (id === null) {
+      localStorage.setItem(ID_NAME, socket.id);
+      id = socket.id;
+    }
   });
 
   socket.on('unauthorized', (reason) => {
@@ -36,7 +43,7 @@ const connect = () => {
       serverNames = msg;
       names = getListOfNames(msg);
       recreateListOfNames(names);
-      recreateListOfContributions(names, contributions, socket.id);
+      recreateListOfContributions(names, contributions, id);
     }
   })
 
@@ -44,7 +51,7 @@ const connect = () => {
     if (isDifferentFromKnown(serverContributions, msg)) {
       serverContributions = msg;
       contributions = getListOfContributions(msg);
-      recreateListOfContributions(names, contributions, socket.id);
+      recreateListOfContributions(names, contributions, id);
     }
   })
 
@@ -63,7 +70,7 @@ const disconnect = () => {
 const addName = () => {
   const nameInput = document.getElementById('name');
   if (nameInput.value.trim().length > 0 ){
-    socket.emit('name-add', nameInput.value);
+    socket.emit('name-add', {value: nameInput.value, id: id});
   }
   nameInput.value = null;
 };
@@ -71,7 +78,7 @@ const addName = () => {
 const addContrib = () => {
   const contribInput = document.getElementById('contribution');
   if (contribInput.value.trim().length > 0 ){
-    socket.emit('contrib-add', contribInput.value);
+    socket.emit('contrib-add', {value: contribInput.value, id: id});
   }
   contribInput.value = null;
 };
