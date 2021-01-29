@@ -75,7 +75,7 @@ async function emitContributions(socket) {
 
 function getNames() {
   return MongoClient.connect(uriMongoDB, {}).then((client) =>  {
-    return client.db(database).collection(name_coll).find().toArray().then((val) => {
+    return client.db(database).collection(name_coll).find().sort('name', 1).toArray().then((val) => {
       return val;
     })
     .finally(() => {client.close();});
