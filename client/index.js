@@ -83,12 +83,12 @@ const addContrib = () => {
   contribInput.value = null;
 };
 
-const addVote = (contrib, socketId, name) => {
-    socket.emit('vote-add', {contrib: contrib, name: name, socketId: socketId});
+const addVote = (contrib, name) => {
+    socket.emit('vote-add', {contrib: contrib, name: name, socketId: id});
 }
 
-const removeVote = (contrib, socketId, name) => {
-  socket.emit('vote-remove', {contrib: contrib, name: name, socketId: socketId});
+const removeVote = (contrib, name) => {
+  socket.emit('vote-remove', {contrib: contrib, name: name, socketId: id});
 }
 
 const getListOfNames = (msg) => {
@@ -129,6 +129,7 @@ const recreateListOfContributions = (names, contributions, socketId) => {
   for (const val in contributions) {
     let votehtml = '';
     let contributionValue = contributions[val].value;
+    let contributionId = contributions[val]._id;
     let hasVoted = false;
     if (contributions[val].hasVoted.includes(socketId)) {
       hasVoted = true;
@@ -141,7 +142,7 @@ const recreateListOfContributions = (names, contributions, socketId) => {
       }
       if (hasVoted) {
         if (hasVotedFor) {
-          votehtml += `<p>${name}: ${contributions[val].votes[name] || 0} <button type="submit" aria-label="Supprimer mon vote pour ${name}" onclick="removeVote('${contributionValue}', '${contributions[val]['socket-id']}', '${name}')" onkeydown="removeVote('${contributionValue}', '${contributions[val]['socket-id']}', '${name}')">-</button></p><br/>`;
+          votehtml += `<p>${name}: ${contributions[val].votes[name] || 0} <button type="submit" aria-label="Supprimer mon vote pour ${name}" onclick="removeVote('${contributionId}', '${name}')" onkeydown="removeVote('${contributionId}', '${name}')">-</button></p><br/>`;
         } else {
           votehtml += `<p>${name}: ${contributions[val].votes[name] || 0}<p><br/>`;
         }
@@ -149,7 +150,7 @@ const recreateListOfContributions = (names, contributions, socketId) => {
         if (contributions[val]['socket-id'] === socketId) {
           votehtml += `<p>${name}: ${contributions[val].votes[name] || 0}<p><br/>`;
         } else {
-          votehtml += `<p>${name}: ${contributions[val].votes[name] || 0} <button type="submit" aria-label="Voter pour ${name}" onclick="addVote('${contributionValue}', '${contributions[val]['socket-id']}', '${name}')" onkeydown="addVote('${contributionValue}', '${contributions[val]['socket-id']}', '${name}')">+</button></p><br/>`;
+          votehtml += `<p>${name}: ${contributions[val].votes[name] || 0} <button type="submit" aria-label="Voter pour ${name}" onclick="addVote('${contributionId}', '${name}')" onkeydown="addVote('${contributionId}', '${name}')">+</button></p><br/>`;
         }
       }
     }
