@@ -3,6 +3,7 @@ const http = require('http');
 const io = require('socket.io')();
 const express = require('express');
 const path = require('path');
+const ObjectId = require('mongodb').ObjectID;
 const MongoClient = require('mongodb').MongoClient;
 
 const PORT = process.env.PORT || 9000;
@@ -41,12 +42,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('vote-add', (msg) => {
-    addVote(msg.contrib, msg.name, 1, socket.id);
+    addVote(msg.contrib, msg.name, 1, msg.socketId);
     emit(socket);
   })
 
   socket.on('vote-remove', (msg) => {
-    addVote(msg.contrib, msg.name, -1, socket.id);
+    addVote(msg.contrib, msg.name, -1, msg.socketId);
     emit(socket);
   })
 
@@ -125,18 +126,19 @@ function createOrUpdateContribution(socketId, contributionName) {
   });
 }
 
-function addVote(contributionName, votedFor, $expr, socketId) {
+function addVote(contributionId, votedFor, $expr, socketId) {
   let action = '$push';
   if ($expr < 0) {
     action = '$pull'
   }
   MongoClient.connect(uriMongoDB, function(err, client){
-    client.db(database).collection(contribution_coll).findOne({'value': contributionName, 'hasVoted': {'$in': [socketId]}}).then((val) => {
+    client.db(database).collection(contribution_coll).findOne({'_id': new ObjectId(contributionId), 'hasVoted': {'$in': [socketId]}}).then((val) => {
+      console.log(val);
       if ($expr > 0 && val === null) {
-        client.db(database).collection(contribution_coll).findOneAndUpdate({'value': contributionName}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId}, '$inc': {[`votes.${votedFor}`]: $expr}});
+        client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId}, '$inc': {[`votes.${votedFor}`]: $expr}});
       } else if (val !== null) {
         if (val.hasVotedFor[votedFor]?.includes(socketId)) {
-          client.db(database).collection(contribution_coll).findOneAndUpdate({'value': contributionName}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId }, '$inc': {[`votes.${votedFor}`]: $expr}});
+          client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId }, '$inc': {[`votes.${votedFor}`]: $expr}});
         }
       }
     });
