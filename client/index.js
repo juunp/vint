@@ -131,6 +131,7 @@ const recreateListOfContributions = (names, contributions, socketId) => {
     let contributionValue = contributions[val].value;
     let contributionId = contributions[val]._id;
     let hasVoted = false;
+    console.log(contributions);
     if (contributions[val].hasVoted.includes(socketId)) {
       hasVoted = true;
     }

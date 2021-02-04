@@ -5,6 +5,7 @@ const express = require('express');
 const path = require('path');
 const ObjectId = require('mongodb').ObjectID;
 const MongoClient = require('mongodb').MongoClient;
+const { resolve } = require('bluebird');
 
 const PORT = process.env.PORT || 9000;
 const USERNAME = process.env.USERNAME;
@@ -12,6 +13,7 @@ const PASSWORD = process.env.PASSWORD;
 const uriMongoDB = `mongodb+srv://${USERNAME}:${PASSWORD}@sandbox.1vyym.mongodb.net`;
 const database = 'voting_machine';
 const contribution_coll = 'contribution';
+const ready_coll = 'ready';
 const name_coll = 'name';
 
 
@@ -84,11 +86,24 @@ function getNames() {
 }
 
 function getContributions() {
-  return MongoClient.connect(uriMongoDB, {}).then((client) =>  {
-    return client.db(database).collection(contribution_coll).find().toArray().then((val) => {
+  MongoClient.connect(uriMongoDB, {}).then((client) =>  {
+    let ready = client.db(database).collection(ready_coll).findOne({'ready': true});
+    let findContributionsPromise = client.db(database).collection(contribution_coll).find().toArray();
+    ready.then((readyVal) => {
+      if (readyVal !== null) {
+        return findContributionsPromise;
+      } else {
+        return new Promise((resolve, reject) => {
+          return [];
+        });
+      }
+    })
+    .then((val) => {
+      val.shift()
       return val;
     })
     .finally(() => {client.close();});
+    
   })
 }
 
@@ -133,7 +148,6 @@ function addVote(contributionId, votedFor, $expr, socketId) {
   }
   MongoClient.connect(uriMongoDB, function(err, client){
     client.db(database).collection(contribution_coll).findOne({'_id': new ObjectId(contributionId), 'hasVoted': {'$in': [socketId]}}).then((val) => {
-      console.log(val);
       if ($expr > 0 && val === null) {
         client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId}, '$inc': {[`votes.${votedFor}`]: $expr}});
       } else if (val !== null) {
@@ -141,7 +155,9 @@ function addVote(contributionId, votedFor, $expr, socketId) {
           client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId }, '$inc': {[`votes.${votedFor}`]: $expr}});
         }
       }
-    });
+    }).finally(() => {
+      client.close();
+    });;
   });
 }
 
