@@ -128,17 +128,18 @@ const recreateListOfContributions = (names, contributions, socketId) => {
   while (listContributions.firstChild) {
     listContributions.firstChild.remove();
   }
+  let j = 1;
   for (const val in contributions) {
     let votehtml = '';
     let contributionValue = contributions[val].value;
     let contributionId = contributions[val]._id;
     let hasVoted = false;
-    console.log(contributions);
+    
     if (contributions[val].hasVoted.includes(socketId)) {
       hasVoted = true;
     }
     for(let i in names) {
-      let name = names[i];
+      let name = names[i].name;
       let hasVotedFor = false;
       if (hasVoted && contributions[val].hasVotedFor[name]?.includes(socketId)) {
         hasVotedFor = true;
@@ -169,12 +170,27 @@ const recreateListOfContributions = (names, contributions, socketId) => {
         </iframe><br/><a href="${contributionValue}" rel="noopener noreferrer" target="_blank">${contributionValue}</a>`;
       }
     }
+    j++;
     let liste = `<li>
       ${formattedContribution}<br/>
       ${votehtml}
+      <button onclick="next(${j})">next</button>
       </li>`;
     html += liste;
     listContributions.innerHTML = html;
+  }
+}
+
+const next = (index) => {
+  const showElements = document.getElementsByClassName('shown');
+  if (showElements.length > 0) {
+    for (let element of showElements) {
+        element.classList.remove('shown')
+    }
+  }
+  const nextElemShown = document.querySelector(`#contributions li:nth-child(${index}`);
+  if (nextElemShown !== null) {
+    nextElemShown.classList.add('shown');
   }
 }
 

@@ -4,6 +4,10 @@ html {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+body {
+    margin: 0;
+}
+
 
 header {
     display: block;
@@ -44,19 +48,16 @@ content {
     grid-template-columns: 20% 80%;
 }
 
-#names-block, #contributions-block {
+#names-block {
     justify-self: center;
-}
-
-#contributions-block ul {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
 }
 
 #contributions-block li {
     margin: 15px;
     padding: 15px;
+    flex-basis: 100%;
+    flex-shrink: 0;
+    order: 2;
 }
 
 #contributions-block ul p {
@@ -105,4 +106,14 @@ button {
 
 #contributions-block a:visited {
     color: blueviolet;
+}
+
+#contributions {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+}
+
+#contributions li.shown {
+    order: 1;
 }
