@@ -95,7 +95,8 @@ const removeVote = (contrib, name) => {
 const getListOfNames = (msg) => {
     names = [];
     for (const val in msg){
-      names.push(msg[val].name);
+      let socketIdValue = msg[val]["socket-id"];
+      names.push({name : msg[val].name, socketId: socketIdValue});
     }
     return names;
 }
@@ -107,7 +108,7 @@ const recreateListOfNames = (names) => {
   }
   for (const i in names) {
     let li = document.createElement('li');
-    let nameText = document.createTextNode(names[i]);
+    let nameText = document.createTextNode(names[i].name + (names[i].socketId === id ? ' <- you' : ''));
     li.append(nameText);
     listnames.appendChild(li);
   }
