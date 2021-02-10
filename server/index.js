@@ -96,10 +96,10 @@ function getNames() {
 }
 
 function getContributions() {
-  MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) =>  {
+  return MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) =>  {
     let ready = client.db(database).collection(ready_coll).findOne({'ready': true});
     let findContributionsPromise = client.db(database).collection(contribution_coll).find().toArray().finally(() => {client.close();});
-    ready.then((readyVal) => {
+    return ready.then((readyVal) => {
       if (readyVal !== null) {
         return findContributionsPromise;
       } else {
