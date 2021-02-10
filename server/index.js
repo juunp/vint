@@ -15,6 +15,7 @@ const database = 'voting_machine';
 const contribution_coll = 'contribution';
 const ready_coll = 'ready';
 const name_coll = 'name';
+const mongoDBOptions = { useUnifiedTopology: true };
 
 
 const app = express();
@@ -60,10 +61,6 @@ io.on('connection', (socket) => {
   setInterval(async () => {
     emitContributions(socket);
   }, 1000);
-
-  socket.on('disconnect', (reason) => {
-    console.log('disconnected:'  + reason);
-  })
 });
 
 function emit(socket) {
@@ -80,16 +77,17 @@ async function emitContributions(socket) {
 }
 
 function getNames() {
-  return MongoClient.connect(uriMongoDB, {}).then((client) =>  {
+  return MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) =>  {
     return client.db(database).collection(name_coll).find().sort('name', 1).toArray().then((val) => {
       return val;
     })
-    .finally(() => {client.close();});
-  })
+    .catch(() => console.error('cannot get names'))
+    .finally(() => {client.close();})
+  });
 }
 
 function getContributions() {
-  MongoClient.connect(uriMongoDB, {}).then((client) =>  {
+  MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) =>  {
     let ready = client.db(database).collection(ready_coll).findOne({'ready': true});
     let findContributionsPromise = client.db(database).collection(contribution_coll).find().toArray();
     ready.then((readyVal) => {
@@ -105,43 +103,49 @@ function getContributions() {
       val.shift()
       return val;
     })
+    .catch(() => console.error('cannot get contributions'))
     .finally(() => {client.close();});
-    
   })
+  
 }
 
 function createOrUpdateName(socketId, name) {
-  MongoClient.connect(uriMongoDB, function(err, client) {
+  MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) => {
     client.db(database).collection(name_coll).findOne({'socket-id': socketId}).then((val) => {
       if (val == null) {
-        client.db(database).collection(name_coll).insertOne({'socket-id': socketId, 'name': name});
+        client.db(database).collection(name_coll).insertOne({'socket-id': socketId, 'name': name}).finally(() => {
+          client.close();
+        });;
       } else {
-        client.db(database).collection(name_coll).findOneAndUpdate({'socket-id': socketId}, {'$set': {'name': name}});
+        client.db(database).collection(name_coll).findOneAndUpdate({'socket-id': socketId}, {'$set': {'name': name}}).finally(() => {
+          client.close();
+        });;
       }
         }, (err) => {
       console.log(err);
     })
-    .finally(() => {
-      client.close();
-    });
-  });
+    .catch(() => console.error('cannot create or update names'))
+  })
 }
 
 function createOrUpdateContribution(socketId, contributionName) {
-  MongoClient.connect(uriMongoDB, function(err, client) {
+  MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) => {
     client.db(database).collection(contribution_coll).findOne({'socket-id': socketId}).then((val) => {
       if (val == null) {
-        client.db(database).collection(contribution_coll).insertOne({'socket-id': socketId, 'value': contributionName, 'hasVoted': [], 'votes': {}, 'hasVotedFor': {}});
+        client.db(database).collection(contribution_coll).insertOne({'socket-id': socketId, 'value': contributionName, 'hasVoted': [], 'votes': {}, 'hasVotedFor': {}}).finally(() => {
+          client.close();
+        });;
       } else {
-        client.db(database).collection(contribution_coll).findOneAndUpdate({'socket-id': socketId}, {'$set': {'value': contributionName}});
+        client.db(database).collection(contribution_coll).findOneAndUpdate({'socket-id': socketId}, {'$set': {'value': contributionName}}).finally(() => {
+          client.close();
+        });;
       }
         }, (err) => {
       console.log(err);
     })
-    .finally(() => {
-      client.close();
-    });
-  });
+    .catch(() => console.error('cannot create or update contributions'))
+    
+  })
 }
 
 function addVote(contributionId, votedFor, $expr, socketId) {
@@ -149,18 +153,22 @@ function addVote(contributionId, votedFor, $expr, socketId) {
   if ($expr < 0) {
     action = '$pull'
   }
-  MongoClient.connect(uriMongoDB, function(err, client){
+  MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) => {
     client.db(database).collection(contribution_coll).findOne({'_id': new ObjectId(contributionId), 'hasVoted': {'$in': [socketId]}}).then((val) => {
       if ($expr > 0 && val === null) {
-        client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId}, '$inc': {[`votes.${votedFor}`]: $expr}});
+        client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId}, '$inc': {[`votes.${votedFor}`]: $expr}}).finally(() => {
+          client.close();
+        });;
       } else if (val !== null) {
         if (val.hasVotedFor[votedFor]?.includes(socketId)) {
-          client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId }, '$inc': {[`votes.${votedFor}`]: $expr}});
+          client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId }, '$inc': {[`votes.${votedFor}`]: $expr}}).finally(() => {
+            client.close();
+          });;
         }
       }
-    }).finally(() => {
-      client.close();
-    });;
+      
+    })
+    .catch(() => console.error('cannot vote'))
   });
 }
 
