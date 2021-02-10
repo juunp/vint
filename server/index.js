@@ -55,11 +55,19 @@ io.on('connection', (socket) => {
   })
 
   setInterval(async () => {
-    emitNames(socket);
+    try {
+      emitNames(socket);
+    } catch (err) {
+      console.error(err);
+    }
   }, 1000);
 
   setInterval(async () => {
-    emitContributions(socket);
+    try {
+      emitContributions(socket);
+    } catch (err) {
+      console.error(err);
+    }
   }, 1000);
 });
 
@@ -83,13 +91,14 @@ function getNames() {
     })
     .catch(() => console.error('cannot get names'))
     .finally(() => {client.close();})
-  });
+  })
+  .catch((err) => console.error(err))
 }
 
 function getContributions() {
   MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) =>  {
     let ready = client.db(database).collection(ready_coll).findOne({'ready': true});
-    let findContributionsPromise = client.db(database).collection(contribution_coll).find().toArray();
+    let findContributionsPromise = client.db(database).collection(contribution_coll).find().toArray().finally(() => {client.close();});
     ready.then((readyVal) => {
       if (readyVal !== null) {
         return findContributionsPromise;
@@ -104,8 +113,7 @@ function getContributions() {
       return val;
     })
     .catch(() => console.error('cannot get contributions'))
-    .finally(() => {client.close();});
-  })
+  }).catch((err) => console.error(err))
   
 }
 
@@ -115,11 +123,11 @@ function createOrUpdateName(socketId, name) {
       if (val == null) {
         client.db(database).collection(name_coll).insertOne({'socket-id': socketId, 'name': name}).finally(() => {
           client.close();
-        });;
+        });
       } else {
         client.db(database).collection(name_coll).findOneAndUpdate({'socket-id': socketId}, {'$set': {'name': name}}).finally(() => {
           client.close();
-        });;
+        });
       }
         }, (err) => {
       console.log(err);
@@ -134,11 +142,11 @@ function createOrUpdateContribution(socketId, contributionName) {
       if (val == null) {
         client.db(database).collection(contribution_coll).insertOne({'socket-id': socketId, 'value': contributionName, 'hasVoted': [], 'votes': {}, 'hasVotedFor': {}}).finally(() => {
           client.close();
-        });;
+        });
       } else {
         client.db(database).collection(contribution_coll).findOneAndUpdate({'socket-id': socketId}, {'$set': {'value': contributionName}}).finally(() => {
           client.close();
-        });;
+        });
       }
         }, (err) => {
       console.log(err);
@@ -158,12 +166,12 @@ function addVote(contributionId, votedFor, $expr, socketId) {
       if ($expr > 0 && val === null) {
         client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId}, '$inc': {[`votes.${votedFor}`]: $expr}}).finally(() => {
           client.close();
-        });;
+        });
       } else if (val !== null) {
         if (val.hasVotedFor[votedFor]?.includes(socketId)) {
           client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId }, '$inc': {[`votes.${votedFor}`]: $expr}}).finally(() => {
             client.close();
-          });;
+          });
         }
       }
       
