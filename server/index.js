@@ -109,7 +109,6 @@ function getContributions() {
       }
     })
     .then((val) => {
-      val.shift()
       return val;
     })
     .catch(() => console.error('cannot get contributions'))
