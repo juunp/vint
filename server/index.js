@@ -16,7 +16,7 @@ const contribution_coll = 'contribution';
 const ready_coll = 'ready';
 const name_coll = 'name';
 const mongoDBOptions = { useUnifiedTopology: true };
-
+let mongoDBConnection = null;
 
 const app = express();
 const server = http.createServer(app);
@@ -71,6 +71,14 @@ io.on('connection', (socket) => {
   }, 1000);
 });
 
+function checkConnection()
+{
+  if (mongoDBConnection === null) {
+    mongoDBConnection = MongoClient.connect(uriMongoDB, mongoDBOptions);
+  }
+  return mongoDBConnection;
+}
+
 function emit(socket) {
   emitNames(socket);
   emitContributions(socket);
@@ -85,20 +93,19 @@ async function emitContributions(socket) {
 }
 
 function getNames() {
-  return MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) =>  {
+  return checkConnection().then((client) =>  {
     return client.db(database).collection(name_coll).find().sort('name', 1).toArray().then((val) => {
       return val;
     })
     .catch(() => console.error('cannot get names'))
-    .finally(() => {client.close();})
   })
   .catch((err) => console.error(err))
 }
 
 function getContributions() {
-  return MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) =>  {
+  return checkConnection().then((client) =>  {
     let ready = client.db(database).collection(ready_coll).findOne({'ready': true});
-    let findContributionsPromise = client.db(database).collection(contribution_coll).find().toArray().finally(() => {client.close();});
+    let findContributionsPromise = client.db(database).collection(contribution_coll).find().toArray();
     return ready.then((readyVal) => {
       if (readyVal !== null) {
         return findContributionsPromise;
@@ -117,16 +124,12 @@ function getContributions() {
 }
 
 function createOrUpdateName(socketId, name) {
-  MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) => {
+  checkConnection().then((client) => {
     client.db(database).collection(name_coll).findOne({'socket-id': socketId}).then((val) => {
       if (val == null) {
-        client.db(database).collection(name_coll).insertOne({'socket-id': socketId, 'name': name}).finally(() => {
-          client.close();
-        });
+        client.db(database).collection(name_coll).insertOne({'socket-id': socketId, 'name': name})
       } else {
-        client.db(database).collection(name_coll).findOneAndUpdate({'socket-id': socketId}, {'$set': {'name': name}}).finally(() => {
-          client.close();
-        });
+        client.db(database).collection(name_coll).findOneAndUpdate({'socket-id': socketId}, {'$set': {'name': name}})
       }
         }, (err) => {
       console.log(err);
@@ -136,16 +139,12 @@ function createOrUpdateName(socketId, name) {
 }
 
 function createOrUpdateContribution(socketId, contributionName) {
-  MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) => {
+  checkConnection().then((client) => {
     client.db(database).collection(contribution_coll).findOne({'socket-id': socketId}).then((val) => {
       if (val == null) {
-        client.db(database).collection(contribution_coll).insertOne({'socket-id': socketId, 'value': contributionName, 'hasVoted': [], 'votes': {}, 'hasVotedFor': {}}).finally(() => {
-          client.close();
-        });
+        client.db(database).collection(contribution_coll).insertOne({'socket-id': socketId, 'value': contributionName, 'hasVoted': [], 'votes': {}, 'hasVotedFor': {}})
       } else {
-        client.db(database).collection(contribution_coll).findOneAndUpdate({'socket-id': socketId}, {'$set': {'value': contributionName}}).finally(() => {
-          client.close();
-        });
+        client.db(database).collection(contribution_coll).findOneAndUpdate({'socket-id': socketId}, {'$set': {'value': contributionName}})
       }
         }, (err) => {
       console.log(err);
@@ -160,17 +159,13 @@ function addVote(contributionId, votedFor, $expr, socketId) {
   if ($expr < 0) {
     action = '$pull'
   }
-  MongoClient.connect(uriMongoDB, mongoDBOptions).then((client) => {
+  checkConnection().then((client) => {
     client.db(database).collection(contribution_coll).findOne({'_id': new ObjectId(contributionId), 'hasVoted': {'$in': [socketId]}}).then((val) => {
       if ($expr > 0 && val === null) {
-        client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId}, '$inc': {[`votes.${votedFor}`]: $expr}}).finally(() => {
-          client.close();
-        });
+        client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId}, '$inc': {[`votes.${votedFor}`]: $expr}})
       } else if (val !== null) {
         if (val.hasVotedFor[votedFor]?.includes(socketId)) {
-          client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId }, '$inc': {[`votes.${votedFor}`]: $expr}}).finally(() => {
-            client.close();
-          });
+          client.db(database).collection(contribution_coll).findOneAndUpdate({'_id': new ObjectId(contributionId)}, {[`${action}`]: {[`hasVotedFor.${votedFor}`]: socketId, 'hasVoted': socketId }, '$inc': {[`votes.${votedFor}`]: $expr}})
         }
       }
       
