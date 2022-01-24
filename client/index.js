@@ -171,7 +171,7 @@ const recreateListOfContributions = (names, contributions, socketId) => {
       }
     }
     j++;
-    let liste = `<li>
+    let liste = `<li data-id="${contributionId}">
       ${formattedContribution}<br/>
       ${votehtml}
       <button onclick="next(${j})">next</button>
